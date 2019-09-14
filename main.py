@@ -67,6 +67,7 @@ def detectFaceDlibHog(detector, frame, inHeight=300, inWidth=0):
     return frameDlibHog, bboxes
 
 def openWebCam():
+    global predictor
     hogFaceDetector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
