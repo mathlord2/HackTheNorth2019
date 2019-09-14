@@ -64,8 +64,10 @@ with open("testingdata.csv", "r") as csv_read:
 
 
 
-for epoch in range(1, 100): ## run the model for 100 epochs
+for epoch in range(1, 10000): ## run the model for 100 epochs
     train_loss, valid_loss = [], []
+    if epoch % 10 == 0:
+        torch.save(model, "model.pt")
 
     model.train()
     for data in trainloader:
