@@ -140,4 +140,3 @@ webCamButton = Button(root, text="Open Webcam", font="System 15", background="re
 webCamButton.pack()
 
 root.mainloop()
-
