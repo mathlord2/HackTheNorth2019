@@ -47,7 +47,7 @@ def detectFaceDlibHog(detector, frame, inHeight=300, inWidth=0):
     frameDlibHogSmall = cv2.resize(frameDlibHog, (inWidth, inHeight))
 
     frameDlibHogSmall = cv2.cvtColor(frameDlibHogSmall, cv2.COLOR_BGR2RGB)
-    faceRects = detector(frameDlibHogSmall, 1)
+    faceRects = detector(frameDlibHogSmall, 0)
     bboxes = []
     for (i, faceRect) in enumerate(faceRects):
 
