@@ -7,6 +7,7 @@ import sys
 import imutils
 import numpy as np
 from PIL import Image, ImageTk
+from vision import getImg
 
 root = Tk()
 
@@ -90,15 +91,12 @@ def openWebCam():
     closeButton = Button(root, text="Pause Webcam", font="System 15", background="red2", command=closeWebCam) #CLOSE BUTTON
     closeButton.pack(pady=5)
 
-    emojisText = Label(root, text="Emoji(s):", font="System 20", background="azure")
-    emojisText.pack(pady=1)
-
     showFrame()
 
 def showFrame():
-    global cap, hasFrame, frame2, frame_count, hogFaceDetector, tt_dlibHog, label
-    label = Label(root)
-    label.place(relx=0.5, rely=0.7, anchor='center')
+    global cap, hasFrame, frame2, frame_count, hogFaceDetector, tt_dlibHog, mainlabel, imgtk
+    mainlabel = Label(root)
+    mainlabel.place(relx=0.5, rely=0.6, anchor='center')
     
     hasFrame, frame2 = cap.read()
     frame = cv2.flip( frame2, 1 )
@@ -113,20 +111,44 @@ def showFrame():
     cv2image = cv2.cvtColor(outDlibHog, cv2.COLOR_BGR2RGBA)
     img = Image.fromarray(cv2image)
     imgtk = ImageTk.PhotoImage(image=img)
-    label.imgtk = imgtk
-    label.configure(image=imgtk)
+    mainlabel.imgtk = imgtk
+    mainlabel.configure(image=imgtk)
 
     if frame_count == 1:
         tt_dlibHog = 0
 
-    label.after(10, showFrame)
+    mainlabel.after(10, showFrame)
     
 
 def closeWebCam(): #SOMEONE PROGRAM A CLOSE BUTTON
-    global closeButton, label
-    label.destroy()
+    global imageLink, closeButton, mainlabel, imgtk
+    mainlabel.destroy()
     closeButton.destroy()
     cv2.destroyAllWindows()
+    if imgtk.mode != "RGBA":
+        imgtk = imgtk.convert("RGBA")
+    txt = Image.new('RGBA', imgtk.size, (255,255,255,0))
+
+    draw = ImageDraw.Draw(txt)
+    font = ImageFont.truetype("arial.ttf", fontsize)
+    draw.text((0, 0),caption,(255,0,0),font=font)
+
+    file = filedialog.asksaveasfile(mode='w', defaultextension=".png", filetypes=(("PNG file", "*.png"),("All Files", "*.*") ))
+    if file:
+        abs_path = os.path.abspath(file.name)
+        out = Image.alpha_composite(imgtk, txt)
+        out.save(abs_path) # saves the image to the input file name
+
+    emotions = ["anger", "contempt", "disgust", "fear", "happiness", "neutral", "sadness", "surprise"]
+    emojis = ["U0001F621", "U0001F614", "U0001F616", "U0001F631", "U0001F604", "U0001F610", "U0001F622", "U0001F632"]
+    probabilities = list(getImg(file.name)[0]['faceAttributes']['emotion'].values())
+    maxIndex = probabilities.index(max(probabilities))
+
+    emojiTitle = Label(root, text="Your Emoji:", font="System 20", background="azure")
+    emojiTitle.pack()
+
+    emojiText = Label(root, text=(emotions[maxIndex]+' ' + emojis[maxIndex]))
+    emojiText.pack()
 
 root.geometry('%sx%s' % (1200, 1000))
 root.configure(background="azure")
@@ -140,4 +162,3 @@ webCamButton = Button(root, text="Open Webcam", font="System 15", background="re
 webCamButton.pack()
 
 root.mainloop()
-
