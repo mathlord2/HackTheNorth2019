@@ -153,6 +153,7 @@ def closeWebCam(): #SOMEONE PROGRAM A CLOSE BUTTON
 root.geometry('%sx%s' % (1200, 1000))
 root.configure(background="azure")
 
+<<<<<<< Updated upstream
 image = Image.open("emoticapture.png")
 logo = ImageTk.PhotoImage(image)
 logoLabel = Label(image=logo)
@@ -162,3 +163,9 @@ webCamButton = Button(root, text="Open Webcam", font="System 15", background="re
 webCamButton.pack()
 
 root.mainloop()
+=======
+title = Label(root, text="EmotiCapture :)", font="System 40", background="azure")
+title.pack(pady=50)
+webCamButton = Button(root, text="Open Webcam", font="System 20", background="red2", command=openWebCam)
+webCamButton.pack()
+>>>>>>> Stashed changes
