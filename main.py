@@ -8,8 +8,6 @@ import numpy as np
 from PIL import Image, ImageTk
 
 root = Tk()
-label = Label(root)
-label.place(relx=0.5, rely=0.6, anchor='center')
 
 def shape_to_np(shape, dtype="int"):
 	# initialize the list of (x, y)-coordinates
@@ -71,6 +69,7 @@ def detectFaceDlibHog(detector, frame, inHeight=300, inWidth=0):
 
 def openWebCam():
     global predictor, cap, frame_count, hogFaceDetector, tt_dlibHog, closeButton
+
     hogFaceDetector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
@@ -93,7 +92,10 @@ def openWebCam():
     showFrame()
 
 def showFrame():
-    global cap, hasFrame, frame2, frame_count, hogFaceDetector, tt_dlibHog
+    global cap, hasFrame, frame2, frame_count, hogFaceDetector, tt_dlibHog, label
+    label = Label(root)
+    label.place(relx=0.5, rely=0.6, anchor='center')
+    
     hasFrame, frame2 = cap.read()
     frame = cv2.flip( frame2, 1 )
 
@@ -117,7 +119,9 @@ def showFrame():
     
 
 def closeWebCam(): #SOMEONE PROGRAM A CLOSE BUTTON
-    clicked = False
+    global closeButton, label
+    label.destroy()
+    closeButton.destroy()
 
 root.geometry('%sx%s' % (1200, 1000))
 root.configure(background="azure")
@@ -128,5 +132,6 @@ title.pack(pady=30)
 webCamButton = Button(root, text="Open Webcam", font="System 20", background="red2", command=openWebCam)
 webCamButton.pack()
 
+root.bind('<Escape>')
 root.mainloop()
 
