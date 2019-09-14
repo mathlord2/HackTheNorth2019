@@ -11,7 +11,7 @@ def getDataSet(fileName):
         csvReader = csv.DictReader(csvFile)
         for row in csvReader:
             if row["Usage"] == "Training":
-                output.append([int(row["emotion"]), list(map(int, row["pixels"]))])
+                output.append([int(row["emotion"]), list(map(int, row["pixels"].split()))])
     return output
 
 def process(screen, dots):
