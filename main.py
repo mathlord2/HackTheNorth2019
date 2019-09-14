@@ -4,7 +4,10 @@ import cv2
 import dlib
 import time
 import sys
+import imutils
 import numpy as np
+from PIL import Image, ImageTk
+from vision import getImg
 
 root = Tk()
 
@@ -62,12 +65,13 @@ def detectFaceDlibHog(detector, frame, inHeight=300, inWidth=0):
         # loop over the (x, y)-coordinates for the facial landmarks
         # and draw them on the image
         for (x, y) in shape:
-            cv2.circle(frameDlibHog, (int(x*scaleWidth), int(y*scaleHeight)), 1, (0, 0, 255), -1)
+            cv2.circle(frameDlibHog, (int(x*scaleWidth), int(y*scaleHeight)), 1, (255, 255, 255), -1)
 
     return frameDlibHog, bboxes
 
 def openWebCam():
-    global predictor
+    global predictor, cap, frame_count, hogFaceDetector, tt_dlibHog, closeButton
+
     hogFaceDetector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
@@ -76,42 +80,85 @@ def openWebCam():
         source = sys.argv[1]
 
     cap = cv2.VideoCapture(source)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 450)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
     hasFrame, frame2 = cap.read()
     frame = cv2.flip( frame2, 0 )
-    vid_writer = cv2.VideoWriter('output-hog-{}.avi'.format(str(source).split(".")[0]),cv2.VideoWriter_fourcc('M','J','P','G'), 15, (frame.shape[1],frame.shape[0]))
 
     frame_count = 0
     tt_dlibHog = 0
-    while(1):
-        hasFrame, frame2 = cap.read()
-        frame = cv2.flip( frame2, 1 )
-        if not hasFrame:
-            break
-        frame_count += 1
 
-        t = time.time()
-        outDlibHog, bboxes = detectFaceDlibHog(hogFaceDetector,frame)
-        tt_dlibHog += time.time() - t
-        fpsDlibHog = frame_count / tt_dlibHog
+    closeButton = Button(root, text="Pause Webcam", font="System 15", background="red2", command=closeWebCam) #CLOSE BUTTON
+    closeButton.pack(pady=5)
 
-        cv2.imshow("EmotiCapture", outDlibHog)
+    showFrame()
 
-        vid_writer.write(outDlibHog)
-        if frame_count == 1:
-            tt_dlibHog = 0
+def showFrame():
+    global cap, hasFrame, frame2, frame_count, hogFaceDetector, tt_dlibHog, mainlabel, imgtk
+    mainlabel = Label(root)
+    mainlabel.place(relx=0.5, rely=0.6, anchor='center')
+    
+    hasFrame, frame2 = cap.read()
+    frame = cv2.flip( frame2, 1 )
 
-        k = cv2.waitKey(10)
-        if k == 27:
-            break
+    frame_count += 1
+        
+    t = time.time()
+    outDlibHog, bboxes = detectFaceDlibHog(hogFaceDetector,frame)
+    tt_dlibHog += time.time() - t
+    fpsDlibHog = frame_count / tt_dlibHog
+
+    cv2image = cv2.cvtColor(outDlibHog, cv2.COLOR_BGR2RGBA)
+    img = Image.fromarray(cv2image)
+    imgtk = ImageTk.PhotoImage(image=img)
+    mainlabel.imgtk = imgtk
+    mainlabel.configure(image=imgtk)
+
+    if frame_count == 1:
+        tt_dlibHog = 0
+
+    mainlabel.after(10, showFrame)
+    
+
+def closeWebCam(): #SOMEONE PROGRAM A CLOSE BUTTON
+    global imageLink, closeButton, mainlabel, imgtk
+    mainlabel.destroy()
+    closeButton.destroy()
     cv2.destroyAllWindows()
-    vid_writer.release()
+    if imgtk.mode != "RGBA":
+        imgtk = imgtk.convert("RGBA")
+    txt = Image.new('RGBA', imgtk.size, (255,255,255,0))
+
+    draw = ImageDraw.Draw(txt)
+    font = ImageFont.truetype("arial.ttf", fontsize)
+    draw.text((0, 0),caption,(255,0,0),font=font)
+
+    file = filedialog.asksaveasfile(mode='w', defaultextension=".png", filetypes=(("PNG file", "*.png"),("All Files", "*.*") ))
+    if file:
+        abs_path = os.path.abspath(file.name)
+        out = Image.alpha_composite(imgtk, txt)
+        out.save(abs_path) # saves the image to the input file name
+
+    emotions = ["anger", "contempt", "disgust", "fear", "happiness", "neutral", "sadness", "surprise"]
+    emojis = ["U0001F621", "U0001F614", "U0001F616", "U0001F631", "U0001F604", "U0001F610", "U0001F622", "U0001F632"]
+    probabilities = list(getImg(file.name)[0]['faceAttributes']['emotion'].values())
+    maxIndex = probabilities.index(max(probabilities))
+
+    emojiTitle = Label(root, text="Your Emoji:", font="System 20", background="azure")
+    emojiTitle.pack()
+
+    emojiText = Label(root, text=(emotions[maxIndex]+' ' + emojis[maxIndex]))
+    emojiText.pack()
 
 root.geometry('%sx%s' % (1200, 1000))
 root.configure(background="azure")
 
-title = Label(root, text="EmotiCapture :)", font="System 40", background="azure")
-title.pack(pady=50)
-webCamButton = Button(root, text="Open Webcam", font="System 20", background="red2", command=openWebCam)
+image = Image.open("emoticapture.png")
+logo = ImageTk.PhotoImage(image)
+logoLabel = Label(image=logo)
+logoLabel.pack(pady=20)
+
+webCamButton = Button(root, text="Open Webcam", font="System 15", background="red2", command=openWebCam)
 webCamButton.pack()
 
-
+root.mainloop()
