@@ -4,6 +4,7 @@ import cv2
 import dlib
 import time
 import sys
+import imutils
 import numpy as np
 from PIL import Image, ImageTk
 
@@ -63,7 +64,7 @@ def detectFaceDlibHog(detector, frame, inHeight=300, inWidth=0):
         # loop over the (x, y)-coordinates for the facial landmarks
         # and draw them on the image
         for (x, y) in shape:
-            cv2.circle(frameDlibHog, (int(x*scaleWidth), int(y*scaleHeight)), 1, (0, 0, 255), -1)
+            cv2.circle(frameDlibHog, (int(x*scaleWidth), int(y*scaleHeight)), 1, (255, 255, 255), -1)
 
     return frameDlibHog, bboxes
 
@@ -78,8 +79,8 @@ def openWebCam():
         source = sys.argv[1]
 
     cap = cv2.VideoCapture(source)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 600)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 400)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 450)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
     hasFrame, frame2 = cap.read()
     frame = cv2.flip( frame2, 0 )
 
@@ -87,14 +88,17 @@ def openWebCam():
     tt_dlibHog = 0
 
     closeButton = Button(root, text="Pause Webcam", font="System 15", background="red2", command=closeWebCam) #CLOSE BUTTON
-    closeButton.pack(pady=10)
+    closeButton.pack(pady=5)
+
+    emojisText = Label(root, text="Emoji(s):", font="System 20", background="azure")
+    emojisText.pack(pady=1)
 
     showFrame()
 
 def showFrame():
     global cap, hasFrame, frame2, frame_count, hogFaceDetector, tt_dlibHog, label
     label = Label(root)
-    label.place(relx=0.5, rely=0.65, anchor='center')
+    label.place(relx=0.5, rely=0.7, anchor='center')
     
     hasFrame, frame2 = cap.read()
     frame = cv2.flip( frame2, 1 )
@@ -122,6 +126,7 @@ def closeWebCam(): #SOMEONE PROGRAM A CLOSE BUTTON
     global closeButton, label
     label.destroy()
     closeButton.destroy()
+    cv2.destroyAllWindows()
 
 root.geometry('%sx%s' % (1200, 1000))
 root.configure(background="azure")
