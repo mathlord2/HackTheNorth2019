@@ -47,7 +47,7 @@ def detectFaceDlibHog(detector, frame, inHeight=300, inWidth=0):
     frameDlibHogSmall = cv2.resize(frameDlibHog, (inWidth, inHeight))
 
     frameDlibHogSmall = cv2.cvtColor(frameDlibHogSmall, cv2.COLOR_BGR2RGB)
-    faceRects = detector(frameDlibHogSmall, 1)
+    faceRects = detector(frameDlibHogSmall, 0)
     bboxes = []
     for (i, faceRect) in enumerate(faceRects):
 
@@ -94,7 +94,7 @@ def openWebCam():
         tt_dlibHog += time.time() - t
         fpsDlibHog = frame_count / tt_dlibHog
 
-        cv2.imshow("Face Detection Comparison", outDlibHog)
+        cv2.imshow("EmotiCapture", outDlibHog)
 
         vid_writer.write(outDlibHog)
         if frame_count == 1:
