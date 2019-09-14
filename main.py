@@ -86,15 +86,15 @@ def openWebCam():
     frame_count = 0
     tt_dlibHog = 0
 
-    closeButton = Button(root, text="Close Webcam", font="System 10", background="red2", command=closeWebCam) #CLOSE BUTTON
-    closeButton.pack(pady=30)
+    closeButton = Button(root, text="Pause Webcam", font="System 15", background="red2", command=closeWebCam) #CLOSE BUTTON
+    closeButton.pack(pady=10)
 
     showFrame()
 
 def showFrame():
     global cap, hasFrame, frame2, frame_count, hogFaceDetector, tt_dlibHog, label
     label = Label(root)
-    label.place(relx=0.5, rely=0.6, anchor='center')
+    label.place(relx=0.5, rely=0.65, anchor='center')
     
     hasFrame, frame2 = cap.read()
     frame = cv2.flip( frame2, 1 )
@@ -126,12 +126,13 @@ def closeWebCam(): #SOMEONE PROGRAM A CLOSE BUTTON
 root.geometry('%sx%s' % (1200, 1000))
 root.configure(background="azure")
 
-title = Label(root, text="EmotiCapture :)", font="System 40", background="azure")
-title.pack(pady=30)
+image = Image.open("emoticapture.png")
+logo = ImageTk.PhotoImage(image)
+logoLabel = Label(image=logo)
+logoLabel.pack(pady=20)
 
-webCamButton = Button(root, text="Open Webcam", font="System 20", background="red2", command=openWebCam)
+webCamButton = Button(root, text="Open Webcam", font="System 15", background="red2", command=openWebCam)
 webCamButton.pack()
 
-root.bind('<Escape>')
 root.mainloop()
 
