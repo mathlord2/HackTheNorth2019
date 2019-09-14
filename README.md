@@ -1,1 +1,2 @@
-# HackTheNorth2019
+# EmotiCapture
+Convert your facial expressions to emojis.
