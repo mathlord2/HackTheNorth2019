@@ -5,8 +5,11 @@ import dlib
 import time
 import sys
 import numpy as np
+from PIL import Image, ImageTk
 
 root = Tk()
+label = Label(root)
+label.place(relx=0.5, rely=0.6, anchor='center')
 
 def shape_to_np(shape, dtype="int"):
 	# initialize the list of (x, y)-coordinates
@@ -67,7 +70,7 @@ def detectFaceDlibHog(detector, frame, inHeight=300, inWidth=0):
     return frameDlibHog, bboxes
 
 def openWebCam():
-    global predictor
+    global predictor, cap, frame_count, hogFaceDetector, tt_dlibHog, closeButton
     hogFaceDetector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
@@ -76,42 +79,56 @@ def openWebCam():
         source = sys.argv[1]
 
     cap = cv2.VideoCapture(source)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 600)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 400)
     hasFrame, frame2 = cap.read()
     frame = cv2.flip( frame2, 0 )
-    vid_writer = cv2.VideoWriter('output-hog-{}.avi'.format(str(source).split(".")[0]),cv2.VideoWriter_fourcc('M','J','P','G'), 15, (frame.shape[1],frame.shape[0]))
 
     frame_count = 0
     tt_dlibHog = 0
-    while(1):
-        hasFrame, frame2 = cap.read()
-        frame = cv2.flip( frame2, 1 )
-        if not hasFrame:
-            break
-        frame_count += 1
 
-        t = time.time()
-        outDlibHog, bboxes = detectFaceDlibHog(hogFaceDetector,frame)
-        tt_dlibHog += time.time() - t
-        fpsDlibHog = frame_count / tt_dlibHog
+    closeButton = Button(root, text="Close Webcam", font="System 10", background="red2")
+    closeButton.pack(pady=30)
+    
+    showFrame()
 
-        cv2.imshow("Face Detection Comparison", outDlibHog)
+def showFrame():
+    global cap, hasFrame, frame2, frame_count, hogFaceDetector, tt_dlibHog
+    hasFrame, frame2 = cap.read()
+    frame = cv2.flip( frame2, 1 )
 
-        vid_writer.write(outDlibHog)
-        if frame_count == 1:
-            tt_dlibHog = 0
+    frame_count += 1
+    
+    t = time.time()
+    outDlibHog, bboxes = detectFaceDlibHog(hogFaceDetector,frame)
+    tt_dlibHog += time.time() - t
+    fpsDlibHog = frame_count / tt_dlibHog
 
-        k = cv2.waitKey(10)
-        if k == 27:
-            break
-    cv2.destroyAllWindows()
-    vid_writer.release()
+    cv2image = cv2.cvtColor(outDlibHog, cv2.COLOR_BGR2RGBA)
+    img = Image.fromarray(cv2image)
+    imgtk = ImageTk.PhotoImage(image=img)
+    label.imgtk = imgtk
+    label.configure(image=imgtk)
+
+    if frame_count == 1:
+        tt_dlibHog = 0
+
+    closeButton = Button(label, text="Close Webcam", font="System 10", background="red2", command=closeWebCam)
+
+    label.after(10, showFrame)
+    
+
+def closeWebCam():
+    pass
 
 root.geometry('%sx%s' % (1200, 1000))
 root.configure(background="azure")
 
 title = Label(root, text="EmotiCapture :)", font="System 40", background="azure")
-title.pack(pady=50)
+title.pack(pady=30)
+
 webCamButton = Button(root, text="Open Webcam", font="System 20", background="red2", command=openWebCam)
 webCamButton.pack()
 
+root.mainloop()
 
