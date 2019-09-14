@@ -87,9 +87,9 @@ def openWebCam():
     frame_count = 0
     tt_dlibHog = 0
 
-    closeButton = Button(root, text="Close Webcam", font="System 10", background="red2")
+    closeButton = Button(root, text="Close Webcam", font="System 10", background="red2", command=closeWebCam) #CLOSE BUTTON
     closeButton.pack(pady=30)
-    
+
     showFrame()
 
 def showFrame():
@@ -98,7 +98,7 @@ def showFrame():
     frame = cv2.flip( frame2, 1 )
 
     frame_count += 1
-    
+        
     t = time.time()
     outDlibHog, bboxes = detectFaceDlibHog(hogFaceDetector,frame)
     tt_dlibHog += time.time() - t
@@ -113,13 +113,11 @@ def showFrame():
     if frame_count == 1:
         tt_dlibHog = 0
 
-    closeButton = Button(label, text="Close Webcam", font="System 10", background="red2", command=closeWebCam)
-
     label.after(10, showFrame)
     
 
-def closeWebCam():
-    pass
+def closeWebCam(): #SOMEONE PROGRAM A CLOSE BUTTON
+    clicked = False
 
 root.geometry('%sx%s' % (1200, 1000))
 root.configure(background="azure")
