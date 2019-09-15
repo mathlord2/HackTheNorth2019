@@ -8,8 +8,19 @@ import imutils
 import numpy as np
 from PIL import Image, ImageTk
 from vision import getImg
+import pyperclip
 
+#Set initial values
 root = Tk()
+emojiExists = False
+angryFace = ImageTk.PhotoImage(Image.open("angryFace.png"))
+contemptFace = ImageTk.PhotoImage(Image.open("contemptFace.png"))
+disgustedFace = ImageTk.PhotoImage(Image.open("disgustedFace.png"))
+fearFace = ImageTk.PhotoImage(Image.open("fearFace.png"))
+happyFace = ImageTk.PhotoImage(Image.open("happyFace.png"))
+neutralFace = ImageTk.PhotoImage(Image.open("neutralFace.png"))
+sadFace = ImageTk.PhotoImage(Image.open("sadFace.png"))
+surprisedFace = ImageTk.PhotoImage(Image.open("surprisedFace.png"))
 
 def shape_to_np(shape, dtype="int"):
 	# initialize the list of (x, y)-coordinates
@@ -64,8 +75,8 @@ def detectFaceDlibHog(detector, frame, inHeight=300, inWidth=0):
     
         # loop over the (x, y)-coordinates for the facial landmarks
         # and draw them on the image
-        for (x, y) in shape:
-            cv2.circle(frameDlibHog, (int(x*scaleWidth), int(y*scaleHeight)), 1, (255, 255, 255), -1)
+        #for (x, y) in shape:
+            #cv2.circle(frameDlibHog, (int(x*scaleWidth), int(y*scaleHeight)), 1, (255, 255, 255), -1)
 
     return frameDlibHog, bboxes
 
@@ -80,8 +91,8 @@ def openWebCam():
         source = sys.argv[1]
 
     cap = cv2.VideoCapture(source)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 450)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 375)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 250)
     hasFrame, frame2 = cap.read()
     frame = cv2.flip( frame2, 0 )
 
@@ -94,9 +105,14 @@ def openWebCam():
     showFrame()
 
 def showFrame():
-    global cap, hasFrame, frame2, frame_count, hogFaceDetector, tt_dlibHog, mainlabel, imgtk
+    global cap, hasFrame, frame2, frame_count, hogFaceDetector, tt_dlibHog, mainlabel, imgtk, outDlibHog, emojiTitle, emojiText, emojiExists, emoji
     mainlabel = Label(root)
-    mainlabel.place(relx=0.5, rely=0.6, anchor='center')
+    mainlabel.place(relx=0.5, rely=0.65, anchor='center')
+
+    if emojiExists:
+        emojiTitle.destroy()
+        emojiText.destroy()
+        emoji.destroy()
     
     hasFrame, frame2 = cap.read()
     frame = cv2.flip( frame2, 1 )
@@ -121,39 +137,37 @@ def showFrame():
     
 
 def closeWebCam(): #SOMEONE PROGRAM A CLOSE BUTTON
-    global imageLink, closeButton, mainlabel, imgtk
+    global imageLink, closeButton, mainlabel, imgtk, outDlibHog, emojiTitle, emojiText, emojiExists, emoji
+
     mainlabel.destroy()
     closeButton.destroy()
     cv2.destroyAllWindows()
-    if imgtk.mode != "RGBA":
-        imgtk = imgtk.convert("RGBA")
-    txt = Image.new('RGBA', imgtk.size, (255,255,255,0))
 
-    draw = ImageDraw.Draw(txt)
-    font = ImageFont.truetype("arial.ttf", fontsize)
-    draw.text((0, 0),caption,(255,0,0),font=font)
+    cv2.imwrite("images/" + "frame-" + time.strftime("%d-%m-%Y-%H-%M-%S") + ".jpg", cv2.cvtColor(outDlibHog, cv2.COLOR_BGR2RGBA))
 
-    file = filedialog.asksaveasfile(mode='w', defaultextension=".png", filetypes=(("PNG file", "*.png"),("All Files", "*.*") ))
-    if file:
-        abs_path = os.path.abspath(file.name)
-        out = Image.alpha_composite(imgtk, txt)
-        out.save(abs_path) # saves the image to the input file name
-
-    emotions = ["anger", "contempt", "disgust", "fear", "happiness", "neutral", "sadness", "surprise"]
-    emojis = ["U0001F621", "U0001F614", "U0001F616", "U0001F631", "U0001F604", "U0001F610", "U0001F622", "U0001F632"]
-    probabilities = list(getImg(file.name)[0]['faceAttributes']['emotion'].values())
+    emotions = ["Anger:", "Contempt:", "Disgust:", "Fear:", "Happiness:", "Neutral:", "Sadness:", "Surprise:"]
+    emojis = [angryFace, contemptFace, disgustedFace, fearFace, happyFace, neutralFace, sadFace, surprisedFace]
+    codes = ["\U0001F620", "\U0001F612", "\U0001F922", "\U0001F628", "\U0001F603", "\U0001F610", "\U0001F622", "\U0001F631"]
+    probabilities = list(getImg("images/" + "frame-" + time.strftime("%d-%m-%Y-%H-%M-%S") + ".jpg")[0]['faceAttributes']['emotion'].values())
     maxIndex = probabilities.index(max(probabilities))
 
-    emojiTitle = Label(root, text="Your Emoji:", font="System 20", background="azure")
+    emojiTitle = Label(root, text="Your Emoji:", font="System 20", background="white")
     emojiTitle.pack()
 
-    emojiText = Label(root, text=(emotions[maxIndex]+' ' + emojis[maxIndex]))
-    emojiText.pack()
+    emojiText = Label(root, text=emotions[maxIndex], font="System", background="white")
+    emojiText.place(x=530, y=240)
 
+    emoji = Label(image=emojis[maxIndex]) #Actual emoji
+    emoji.place(x=630, y=230)
+
+    pyperclip.copy(codes[maxIndex]) #Copy to clipboard
+
+    emojiExists = True #Deletes emoji information next time webcam is run
+    
 root.geometry('%sx%s' % (1200, 1000))
-root.configure(background="azure")
+root.configure(background="white")
 
-image = Image.open("emoticapture.png")
+image = Image.open("Easymoji_logo.png")
 logo = ImageTk.PhotoImage(image)
 logoLabel = Label(image=logo)
 logoLabel.pack(pady=20)
