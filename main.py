@@ -124,6 +124,7 @@ def showFrame():
     tt_dlibHog += time.time() - t
     fpsDlibHog = frame_count / tt_dlibHog
 
+
     cv2image = cv2.cvtColor(outDlibHog, cv2.COLOR_BGR2RGBA)
     img = Image.fromarray(cv2image)
     imgtk = ImageTk.PhotoImage(image=img)
@@ -145,20 +146,20 @@ def closeWebCam(): #SOMEONE PROGRAM A CLOSE BUTTON
 
     cv2.imwrite("images/" + "frame-" + time.strftime("%d-%m-%Y-%H-%M-%S") + ".jpg", cv2.cvtColor(outDlibHog, cv2.COLOR_BGR2RGBA))
 
-    emotions = ["Anger:", "Contempt:", "Disgust:", "Fear:", "Happiness:", "Neutral:", "Sadness:", "Surprise:"]
+    emotions = ["Anger", "Contempt", "Disgust", "Fear", "Happiness", "Neutral", "Sadness", "Surprise"]
     emojis = [angryFace, contemptFace, disgustedFace, fearFace, happyFace, neutralFace, sadFace, surprisedFace]
     codes = ["\U0001F620", "\U0001F612", "\U0001F922", "\U0001F628", "\U0001F603", "\U0001F610", "\U0001F622", "\U0001F631"]
     probabilities = list(getImg("images/" + "frame-" + time.strftime("%d-%m-%Y-%H-%M-%S") + ".jpg")[0]['faceAttributes']['emotion'].values())
     maxIndex = probabilities.index(max(probabilities))
 
     emojiTitle = Label(root, text="Your Emoji:", font="System 20", background="white")
-    emojiTitle.pack()
+    emojiTitle.pack(pady=2)
 
-    emojiText = Label(root, text=emotions[maxIndex], font="System", background="white")
-    emojiText.place(x=530, y=240)
+    emojiText = Label(root, text=(emotions[maxIndex] + " (" + str(probabilities[maxIndex]*100) + "% accuracy)"), font="System", background="white")
+    emojiText.place(x=450, y=235)
 
     emoji = Label(image=emojis[maxIndex]) #Actual emoji
-    emoji.place(x=630, y=230)
+    emoji.place(x=680, y=230)
 
     pyperclip.copy(codes[maxIndex]) #Copy to clipboard
 
