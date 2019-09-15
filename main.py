@@ -13,14 +13,14 @@ import pyperclip
 #Set initial values
 root = Tk()
 emojiExists = False
-angryFace = ImageTk.PhotoImage(Image.open("angryFace.png"))
-contemptFace = ImageTk.PhotoImage(Image.open("contemptFace.png"))
-disgustedFace = ImageTk.PhotoImage(Image.open("disgustedFace.png"))
-fearFace = ImageTk.PhotoImage(Image.open("fearFace.png"))
-happyFace = ImageTk.PhotoImage(Image.open("happyFace.png"))
-neutralFace = ImageTk.PhotoImage(Image.open("neutralFace.png"))
-sadFace = ImageTk.PhotoImage(Image.open("sadFace.png"))
-surprisedFace = ImageTk.PhotoImage(Image.open("surprisedFace.png"))
+angryFace = ImageTk.PhotoImage(Image.open("assets/angryFace.png"))
+contemptFace = ImageTk.PhotoImage(Image.open("assets/contemptFace.png"))
+disgustedFace = ImageTk.PhotoImage(Image.open("assets/disgustedFace.png"))
+fearFace = ImageTk.PhotoImage(Image.open("assets/fearFace.png"))
+happyFace = ImageTk.PhotoImage(Image.open("assets/happyFace.png"))
+neutralFace = ImageTk.PhotoImage(Image.open("assets/neutralFace.png"))
+sadFace = ImageTk.PhotoImage(Image.open("assets/sadFace.png"))
+surprisedFace = ImageTk.PhotoImage(Image.open("assets/surprisedFace.png"))
 
 def shape_to_np(shape, dtype="int"):
 	# initialize the list of (x, y)-coordinates
